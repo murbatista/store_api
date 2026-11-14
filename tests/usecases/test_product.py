@@ -60,3 +60,20 @@ async def test_usecases_delete_should_not_found():
         err.value.message
         == "Product not found with filter: 1e4f214e-85f7-461a-89d0-a751a32e3bb9"
     )
+
+
+async def test_usecases_update_should_not_found(product_up):
+    with pytest.raises(NotFoundException) as err:
+        await product_usecase.update(
+            id=UUID("1e4f214e-85f7-461a-89d0-a751a32e3bb9"),
+            body=product_up,
+        )
+
+    assert "Product not found" in err.value.message
+
+
+async def test_usecases_query_should_filter_by_price(products_inserted):
+    result = await product_usecase.query(price_gt=5000, price_lt=8000)
+
+    assert len(result) == 2
+    assert all(5000 < product.price < 8000 for product in result)
